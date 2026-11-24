@@ -17,7 +17,6 @@ Computer Science Engineering student focused on backend development. I build wit
 |---|---|
 | **Focus** | Backend development, API design, system reliability |
 | **Primary stack** | Java, Spring Boot, PostgreSQL, Redis |
-| **Currently building** | A payment gateway with Spring Boot |
 | **Practicing** | Data structures and algorithms on LeetCode |
 
 ---
@@ -77,15 +76,22 @@ A real-time AI exam proctoring system that verifies student identity, tracks att
 
 ---
 
-### 3. Payment Gateway *(in progress)*
+### 3. Ticket Booking
 
-A Stripe/Razorpay-style payment service built with Spring Boot.
+A REST backend for booking movie seats in which two people can never book the same seat, proven by a multi-threaded test.
+
+**Links:** [Source Code](https://github.com/tsetan13821/ticket-booking)
 
 | Feature | Implementation |
 |---|---|
-| **Payments API** | Idempotent payment APIs to prevent duplicate charges |
-| **Transactions** | Safe transaction handling for consistent payment state |
-| **Security** | Authentication and authorization for merchants and users |
+| **No double booking** | Each booking locks its seat rows with `SELECT ... FOR UPDATE` (pessimistic locking) in one transaction, so concurrent requests for a seat are serialized and exactly one wins |
+| **No deadlocks** | Seats are always locked in id order, so overlapping requests such as `[A1, A2]` and `[A2, A1]` cannot deadlock |
+| **All or nothing** | If any requested seat is already taken, the whole booking rolls back and returns `409 Conflict` |
+| **Cancellation** | Locks the booking and its seats, frees the seats and keeps a record of which seats were held |
+| **REST API** | Six endpoints for shows, seat maps and bookings, with request validation and RFC 9457 error responses |
+| **Testing** | JUnit concurrency test (10 threads race for one seat, exactly one succeeds), end-to-end API tests on H2, and a Postman collection with live booking races |
+
+**Tech:** Java 21, Spring Boot, Spring Data JPA, PostgreSQL, H2, Lombok, Maven, Postman
 
 ---
 
